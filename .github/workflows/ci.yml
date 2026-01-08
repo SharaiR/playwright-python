@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+          python -m playwright install --with-deps chromium
+
+      - name: Create .env
+        run: |
+          echo "BASE_URL=https://www.saucedemo.com" >> .env
+          echo "HEADLESS=true" >> .env
+          echo "STANDARD_USER=${{ secrets.STANDARD_USER || 'standard_user' }}" >> .env
+          echo "LOCKED_OUT_USER=${{ secrets.LOCKED_OUT_USER || 'locked_out_user' }}" >> .env
+          echo "PASSWORD=${{ secrets.PASSWORD || 'secret_sauce' }}" >> .env
+
+      - name: Run tests (pytest + reruns + coverage)
+        run: |
+          mkdir -p artifacts
+          pytest -n auto --maxfail=1 --reruns 1 --reruns-delay 1 --cov=src --cov-report=xml:artifacts/coverage.xml
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-artifacts
+          path: |
+            artifacts/**
+            .pytest_cache/**

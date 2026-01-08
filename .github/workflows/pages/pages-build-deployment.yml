@@ -1,0 +1,63 @@
+name: pages-build-deployment
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+          python -m playwright install --with-deps chromium
+
+      - name: Create .env
+        run: |
+          echo "BASE_URL=https://www.saucedemo.com" >> .env
+          echo "HEADLESS=true" >> .env
+          echo "STANDARD_USER=${{ secrets.STANDARD_USER || 'standard_user' }}" >> .env
+          echo "LOCKED_OUT_USER=${{ secrets.LOCKED_OUT_USER || 'locked_out_user' }}" >> .env
+          echo "PASSWORD=${{ secrets.PASSWORD || 'secret_sauce' }}" >> .env
+
+      - name: Run tests and collect Allure + coverage (with 1 rerun)
+        run: |
+          mkdir -p artifacts artifacts/allure-results
+          pytest -n auto --maxfail=1 --reruns 1 --reruns-delay 1 --alluredir=artifacts/allure-results --cov=src --cov-report=xml:artifacts/coverage.xml
+
+      - name: Generate Allure HTML
+        uses: simple-elf/allure-report-action@v1
+        with:
+          allure_results: artifacts/allure-results
+          allure_report: site
+
+      - name: Build coverage badge JSON
+        run: |
+          python tools/coverage_badge.py artifacts/coverage.xml site/coverage.json
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

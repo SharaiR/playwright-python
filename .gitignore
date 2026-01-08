@@ -1,0 +1,23 @@
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Test artifacts
+.pytest_cache/
+artifacts/
+allure-report/
+report.html
+site/
+
+# Playwright
+.playwright/
+
+# Build outputs
+build/
+
+# OS files
+.DS_Store
