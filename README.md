@@ -1,7 +1,7 @@
 # TAF (Playwright + Python) for saucedemo.com
 
 [![CI](https://github.com/SharaiR/playwright-python/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/SharaiR/playwright-python/actions/workflows/ci.yml)
-[![pages-build-deployment](https://github.com/SharaiR/playwright-python/actions/workflows/pages/pages-build-deployment.yml/badge.svg)](https://github.com/SharaiR/playwright-python/actions/workflows/pages/pages-build-deployment.yml)
+[![Pages](https://github.com/SharaiR/playwright-python/actions/workflows/pages/pages-build-deployment.yml/badge.svg)](https://github.com/SharaiR/playwright-python/actions/workflows/pages/pages-build-deployment.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.13%2B-blue.svg)](https://www.python.org/downloads/)
 [![Playwright](https://img.shields.io/pypi/v/playwright.svg?label=playwright)](https://pypi.org/project/playwright/)
